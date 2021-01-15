@@ -9,10 +9,7 @@
 *  the outcome might not always be the same and is subject to, for lack of a better phrase, the stupidity of the players.
 */
 import com.sun.javafx.image.IntPixelGetter;
-*.java linguist-detectable=true
-*.js linguist-detectable=false
-*.html linguist-detectable=false
-*.xml linguist-detectable=false
+
 
 import java.io.*;
 import java.util.*;
