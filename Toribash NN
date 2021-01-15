@@ -8,9 +8,6 @@
 *  variables to make the results easier to predict. Also the training data was gathered from public lobbies where
 *  the outcome might not always be the same and is subject to, for lack of a better phrase, the stupidity of the players.
 */
-import com.sun.javafx.image.IntPixelGetter;
-
-
 import java.io.*;
 import java.util.*;
 
