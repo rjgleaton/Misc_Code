@@ -3,6 +3,7 @@ import torch.nn.functional as F
 import numpy as np
 import torch
 import time
+import pdb
 
 class Cost2Go(nn.Module):
     def __init__(self):
@@ -28,7 +29,7 @@ def train_nnet(nnet: nn.Module, states_nnet: np.ndarray, outputs: np.ndarray, ba
 
     start = time.time()
     criterion = nn.MSELoss()
-    optimizer = torch.optim.SGD(nnet.parameters(), lr=0.001)
+    optimizer = torch.optim.SGD(nnet.parameters(), lr=0.001, momentum = 0.9)
     scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer, step_size=100, gamma=0.996)
 
@@ -39,24 +40,25 @@ def train_nnet(nnet: nn.Module, states_nnet: np.ndarray, outputs: np.ndarray, ba
     #data loader, breaks into batches of size 100
     data = torch.utils.data.TensorDataset(inputs_tensor, target)
     dataLoader = torch.utils.data.DataLoader(
-       data, batch_size=batchsize, shuffle=True, num_workers=10)
+       data, batch_size=batchsize, shuffle=True, num_workers=4)
 
-    for epoch in range(num_itrs):
+    for epoch, toLoad in enumerate(dataLoader, 0):
         nnet.train()
         
-        for toLoad in dataLoader:
-            inputs, labels = toLoad
-            pred = nnet(inputs)
+        inputs, labels = toLoad
+        pred = nnet(inputs)
+        #pred = torch.reshape(pred, (1, 100))
+        #labels = torch.reshape(labels, (1, 100))
 
-            loss = criterion(pred, labels)
-            optimizer.zero_grad()
+        loss = criterion(pred, labels)
+        optimizer.zero_grad()
 
-            loss.backward()
-            optimizer.step()
+        loss.backward()
+        optimizer.step()
 
         scheduler.step()
+
         if epoch % 100 == 0:
-            print("Itr: ", epoch, ", loss: ", loss, ", lr: ",
+            print("Itr: ", epoch, ", loss: ", loss.item(), ", lr: ",
                   optimizer.param_groups[0]['lr'], ", target_ctg: ", target.mean(), ", nnet_ctg: ", pred.mean(), ", Time: ", time.time()-start)
-
-
+            start = time.time()
