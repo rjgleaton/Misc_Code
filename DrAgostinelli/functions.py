@@ -1,9 +1,13 @@
+from typing import List
 from torch import nn
 import torch.nn.functional as F
 import numpy as np
 import torch
 import time
 import pdb
+
+from environments.environment_abstract import Environment, State
+
 
 class Cost2Go(nn.Module):
     def __init__(self):
@@ -39,16 +43,14 @@ def train_nnet(nnet: nn.Module, states_nnet: np.ndarray, outputs: np.ndarray, ba
 
     #data loader, breaks into batches of size 100
     data = torch.utils.data.TensorDataset(inputs_tensor, target)
-    dataLoader = torch.utils.data.DataLoader(
+    data_loader = torch.utils.data.DataLoader(
        data, batch_size=batchsize, shuffle=True, num_workers=4)
 
-    for epoch, toLoad in enumerate(dataLoader, 0):
+    for epoch, to_load in enumerate(data_loader, 0):
         nnet.train()
         
-        inputs, labels = toLoad
+        inputs, labels = to_load
         pred = nnet(inputs)
-        #pred = torch.reshape(pred, (1, 100))
-        #labels = torch.reshape(labels, (1, 100))
 
         loss = criterion(pred, labels)
         optimizer.zero_grad()
@@ -60,5 +62,43 @@ def train_nnet(nnet: nn.Module, states_nnet: np.ndarray, outputs: np.ndarray, ba
 
         if epoch % 100 == 0:
             print("Itr: ", epoch, ", loss: ", loss.item(), ", lr: ",
-                  optimizer.param_groups[0]['lr'], ", target_ctg: ", target.mean(), ", nnet_ctg: ", pred.mean(), ", Time: ", time.time()-start)
+                  optimizer.param_groups[0]['lr'], ", target_ctg: ", labels.mean().item(), ", esnnet_ctg: ", pred.mean().item(), ", Time: ", time.time()-start)
             start = time.time()
+pass
+
+def value_iteration(nnet, device, env: Environment, states: List[State]) -> List[float]:
+    theta = 1
+    gamma = 0.9 #discount factor
+    prob = 0.8 #probability of going to next state given action 
+    children = env.expand(states) #tuple of list of children followed by list of path cost for each state
+    rewards = np.invert(env.is_solved(states).astype(int)) #0 path cost for solved states, 1 for unsolved
+
+    while True:
+        delta = 0
+
+        for i, v in enumerate(rewards):
+            if v != 0:
+                print("Ruh Roh Raggy!")
+                next_state_rewards = []
+                rewards_children = np.invert(env.is_solved(children[0][i]).astype(int))
+                #Track each child of that state
+                for j, child in enumerate(children[0][i]):
+                    if rewards_children[j] == 0:
+                        print("OMG!") 
+                    #Find child in actual state and reward list
+                    next_state_rewards.append(rewards_children[j]+children[1][i][j])
+                    #pdb.set_trace()
+                
+                if len(next_state_rewards) != 0:
+                    rewards[i] = min(next_state_rewards)
+                    delta = max(delta, abs(v-rewards[i]))
+            else:
+                print("Zoinks scoob!")
+        
+        print(delta)
+        if delta < theta:
+            break
+    
+    return rewards
+    
+pass        
