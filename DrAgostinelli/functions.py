@@ -67,38 +67,12 @@ def train_nnet(nnet: nn.Module, states_nnet: np.ndarray, outputs: np.ndarray, ba
 pass
 
 def value_iteration(nnet, device, env: Environment, states: List[State]) -> List[float]:
-    theta = 1
-    gamma = 0.9 #discount factor
-    prob = 0.8 #probability of going to next state given action 
-    children = env.expand(states) #tuple of list of children followed by list of path cost for each state
-    rewards = np.invert(env.is_solved(states).astype(int)) #0 path cost for solved states, 1 for unsolved
-
-    while True:
-        delta = 0
-
-        for i, v in enumerate(rewards):
-            if v != 0:
-                print("Ruh Roh Raggy!")
-                next_state_rewards = []
-                rewards_children = np.invert(env.is_solved(children[0][i]).astype(int))
-                #Track each child of that state
-                for j, child in enumerate(children[0][i]):
-                    if rewards_children[j] == 0:
-                        print("OMG!") 
-                    #Find child in actual state and reward list
-                    next_state_rewards.append(rewards_children[j]+children[1][i][j])
-                    #pdb.set_trace()
-                
-                if len(next_state_rewards) != 0:
-                    rewards[i] = min(next_state_rewards)
-                    delta = max(delta, abs(v-rewards[i]))
-            else:
-                print("Zoinks scoob!")
-        
-        print(delta)
-        if delta < theta:
-            break
-    
+    rewards = []
+    for elem in env.is_solved(states):
+        if elem == True:
+            rewards.append(0.0)
+        else:
+            rewards.append(1.0)
     return rewards
-    
+   
 pass        
