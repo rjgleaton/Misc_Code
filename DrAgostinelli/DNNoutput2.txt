@@ -1,0 +1,319 @@
+Preparing Data
+
+Training DNN
+
+--- Value Iteration Update: 0 ---
+Itr:  0 , loss:  0.5505074262619019 , lr:  0.001 , target_ctg:  1.0 , nnet_ctg:  0.2582894265651703 , Time:  0.9841759204864502
+Itr:  100 , loss:  0.0016599190421402454 , lr:  0.000996 , target_ctg:  1.0 , nnet_ctg:  0.977968156337738 , Time:  0.12885642051696777
+Cost-To-Go: 0, Ave DNN Output: 0.982835, MSE: 0.965964
+Cost-To-Go: 1, Ave DNN Output: 1.033808, MSE: 0.001143
+Cost-To-Go: 2, Ave DNN Output: 1.021166, MSE: 0.959162
+Cost-To-Go: 3, Ave DNN Output: 1.006754, MSE: 3.973279
+Cost-To-Go: 4, Ave DNN Output: 1.010541, MSE: 8.937450
+Cost-To-Go: 5, Ave DNN Output: 1.014274, MSE: 15.886713
+Cost-To-Go: 6, Ave DNN Output: 1.011384, MSE: 24.887032
+Cost-To-Go: 7, Ave DNN Output: 1.003429, MSE: 35.959564
+Cost-To-Go: 8, Ave DNN Output: 1.001545, MSE: 48.979382
+Cost-To-Go: 9, Ave DNN Output: 1.001565, MSE: 63.975960
+Cost-To-Go: 10, Ave DNN Output: 1.002887, MSE: 80.949150
+Cost-To-Go: 11, Ave DNN Output: 0.999661, MSE: 100.007790
+Cost-To-Go: 12, Ave DNN Output: 1.000855, MSE: 120.982361
+Cost-To-Go: 13, Ave DNN Output: 0.998054, MSE: 144.047791
+Cost-To-Go: 14, Ave DNN Output: 1.000240, MSE: 168.994949
+Cost-To-Go: 15, Ave DNN Output: 0.996340, MSE: 196.103577
+Cost-To-Go: 16, Ave DNN Output: 0.998596, MSE: 225.043396
+Cost-To-Go: 17, Ave DNN Output: 0.993823, MSE: 256.198822
+Cost-To-Go: 18, Ave DNN Output: 0.997231, MSE: 289.095428
+Cost-To-Go: 19, Ave DNN Output: 0.992073, MSE: 324.286560
+Cost-To-Go: 20, Ave DNN Output: 0.995144, MSE: 361.185883
+Cost-To-Go: 21, Ave DNN Output: 0.989105, MSE: 400.437012
+Cost-To-Go: 22, Ave DNN Output: 0.993078, MSE: 441.292084
+Cost-To-Go: 23, Ave DNN Output: 0.986877, MSE: 484.578705
+Cost-To-Go: 24, Ave DNN Output: 0.991484, MSE: 529.393127
+Cost-To-Go: 25, Ave DNN Output: 0.984822, MSE: 576.729980
+Cost-To-Go: 26, Ave DNN Output: 0.990045, MSE: 625.499329
+Cost-To-Go: 27, Ave DNN Output: 0.982942, MSE: 676.888611
+Cost-To-Go: 28, Ave DNN Output: 0.988318, MSE: 729.632568
+Cost-To-Go: 29, Ave DNN Output: 0.982039, MSE: 785.007263
+Cost-To-Go: 30, Ave DNN Output: 0.998486, MSE: 841.089233
+Cost-To-Go: 31, Ave DNN Output: 0.995725, MSE: 900.256836
+--- Value Iteration Update: 1 ---
+Itr:  200 , loss:  0.01072640996426344 , lr:  0.001 , target_ctg:  0.9900000095367432 , nnet_ctg:  0.9954917430877686 , Time:  0.9282863140106201
+Itr:  300 , loss:  0.010643715038895607 , lr:  0.000996 , target_ctg:  0.9900000095367432 , nnet_ctg:  0.9902265667915344 , Time:  0.15947771072387695
+Cost-To-Go: 0, Ave DNN Output: 0.967267, MSE: 0.935606
+Cost-To-Go: 1, Ave DNN Output: 1.019844, MSE: 0.000395
+Cost-To-Go: 2, Ave DNN Output: 1.010786, MSE: 0.979483
+Cost-To-Go: 3, Ave DNN Output: 0.998577, MSE: 4.005910
+Cost-To-Go: 4, Ave DNN Output: 1.002875, MSE: 8.983269
+Cost-To-Go: 5, Ave DNN Output: 1.007399, MSE: 15.941447
+Cost-To-Go: 6, Ave DNN Output: 1.004924, MSE: 24.951437
+Cost-To-Go: 7, Ave DNN Output: 0.997669, MSE: 36.028584
+Cost-To-Go: 8, Ave DNN Output: 0.996241, MSE: 49.053555
+Cost-To-Go: 9, Ave DNN Output: 0.996823, MSE: 64.051727
+Cost-To-Go: 10, Ave DNN Output: 0.998205, MSE: 81.033325
+Cost-To-Go: 11, Ave DNN Output: 0.995259, MSE: 100.095749
+Cost-To-Go: 12, Ave DNN Output: 0.996410, MSE: 121.080048
+Cost-To-Go: 13, Ave DNN Output: 0.994012, MSE: 144.144714
+Cost-To-Go: 14, Ave DNN Output: 0.996112, MSE: 169.102188
+Cost-To-Go: 15, Ave DNN Output: 0.992600, MSE: 196.208221
+Cost-To-Go: 16, Ave DNN Output: 0.994800, MSE: 225.157181
+Cost-To-Go: 17, Ave DNN Output: 0.990493, MSE: 256.305328
+Cost-To-Go: 18, Ave DNN Output: 0.993755, MSE: 289.213501
+Cost-To-Go: 19, Ave DNN Output: 0.989099, MSE: 324.393555
+Cost-To-Go: 20, Ave DNN Output: 0.992045, MSE: 361.303497
+Cost-To-Go: 21, Ave DNN Output: 0.986524, MSE: 400.540222
+Cost-To-Go: 22, Ave DNN Output: 0.990303, MSE: 441.408569
+Cost-To-Go: 23, Ave DNN Output: 0.984620, MSE: 484.678009
+Cost-To-Go: 24, Ave DNN Output: 0.988993, MSE: 529.507690
+Cost-To-Go: 25, Ave DNN Output: 0.982811, MSE: 576.826416
+Cost-To-Go: 26, Ave DNN Output: 0.987759, MSE: 625.613586
+Cost-To-Go: 27, Ave DNN Output: 0.981097, MSE: 676.984558
+Cost-To-Go: 28, Ave DNN Output: 0.986131, MSE: 729.750549
+Cost-To-Go: 29, Ave DNN Output: 0.980032, MSE: 785.119629
+Cost-To-Go: 30, Ave DNN Output: 0.995239, MSE: 841.277588
+Cost-To-Go: 31, Ave DNN Output: 0.992049, MSE: 900.477478
+--- Value Iteration Update: 2 ---
+Itr:  400 , loss:  0.0010704303858801723 , lr:  0.001 , target_ctg:  1.0 , nnet_ctg:  0.9908041954040527 , Time:  0.9032437801361084
+Itr:  500 , loss:  0.01959073729813099 , lr:  0.000996 , target_ctg:  0.9800000190734863 , nnet_ctg:  0.9946646094322205 , Time:  0.17203950881958008
+Cost-To-Go: 0, Ave DNN Output: 0.945068, MSE: 0.893153
+Cost-To-Go: 1, Ave DNN Output: 1.000387, MSE: 0.000005
+Cost-To-Go: 2, Ave DNN Output: 0.995890, MSE: 1.009091
+Cost-To-Go: 3, Ave DNN Output: 0.986959, MSE: 4.052527
+Cost-To-Go: 4, Ave DNN Output: 0.992887, MSE: 9.043209
+Cost-To-Go: 5, Ave DNN Output: 0.998201, MSE: 16.014874
+Cost-To-Go: 6, Ave DNN Output: 0.996238, MSE: 25.038229
+Cost-To-Go: 7, Ave DNN Output: 0.989930, MSE: 36.121479
+Cost-To-Go: 8, Ave DNN Output: 0.989119, MSE: 49.153313
+Cost-To-Go: 9, Ave DNN Output: 0.990366, MSE: 64.155052
+Cost-To-Go: 10, Ave DNN Output: 0.991875, MSE: 81.147278
+Cost-To-Go: 11, Ave DNN Output: 0.989261, MSE: 100.215752
+Cost-To-Go: 12, Ave DNN Output: 0.990375, MSE: 121.212837
+Cost-To-Go: 13, Ave DNN Output: 0.988434, MSE: 144.278625
+Cost-To-Go: 14, Ave DNN Output: 0.990446, MSE: 169.249512
+Cost-To-Go: 15, Ave DNN Output: 0.987374, MSE: 196.354584
+Cost-To-Go: 16, Ave DNN Output: 0.989545, MSE: 225.314850
+Cost-To-Go: 17, Ave DNN Output: 0.985759, MSE: 256.456848
+Cost-To-Go: 18, Ave DNN Output: 0.988882, MSE: 289.379242
+Cost-To-Go: 19, Ave DNN Output: 0.984787, MSE: 324.548859
+Cost-To-Go: 20, Ave DNN Output: 0.987602, MSE: 361.472412
+Cost-To-Go: 21, Ave DNN Output: 0.982636, MSE: 400.695770
+Cost-To-Go: 22, Ave DNN Output: 0.986208, MSE: 441.580566
+Cost-To-Go: 23, Ave DNN Output: 0.981089, MSE: 484.833405
+Cost-To-Go: 24, Ave DNN Output: 0.985199, MSE: 529.682190
+Cost-To-Go: 25, Ave DNN Output: 0.979520, MSE: 576.984436
+Cost-To-Go: 26, Ave DNN Output: 0.984144, MSE: 625.794373
+Cost-To-Go: 27, Ave DNN Output: 0.977930, MSE: 677.149170
+Cost-To-Go: 28, Ave DNN Output: 0.982552, MSE: 729.943848
+Cost-To-Go: 29, Ave DNN Output: 0.976601, MSE: 785.311829
+Cost-To-Go: 30, Ave DNN Output: 0.990582, MSE: 841.547668
+Cost-To-Go: 31, Ave DNN Output: 0.986399, MSE: 900.816528
+--- Value Iteration Update: 3 ---
+Itr:  600 , loss:  0.019002456218004227 , lr:  0.001 , target_ctg:  0.9800000190734863 , nnet_ctg:  0.9834191799163818 , Time:  0.9124195575714111
+Itr:  700 , loss:  0.01869073137640953 , lr:  0.000996 , target_ctg:  0.9800000190734863 , nnet_ctg:  0.9853904247283936 , Time:  0.1670374870300293
+Cost-To-Go: 0, Ave DNN Output: 0.935679, MSE: 0.875495
+Cost-To-Go: 1, Ave DNN Output: 0.994333, MSE: 0.000040
+Cost-To-Go: 2, Ave DNN Output: 0.992971, MSE: 1.014901
+Cost-To-Go: 3, Ave DNN Output: 0.986552, MSE: 4.054157
+Cost-To-Go: 4, Ave DNN Output: 0.993810, MSE: 9.037644
+Cost-To-Go: 5, Ave DNN Output: 0.999387, MSE: 16.005318
+Cost-To-Go: 6, Ave DNN Output: 0.997894, MSE: 25.021639
+Cost-To-Go: 7, Ave DNN Output: 0.992259, MSE: 36.093460
+Cost-To-Go: 8, Ave DNN Output: 0.991907, MSE: 49.114216
+Cost-To-Go: 9, Ave DNN Output: 0.993631, MSE: 64.102707
+Cost-To-Go: 10, Ave DNN Output: 0.995262, MSE: 81.086235
+Cost-To-Go: 11, Ave DNN Output: 0.992871, MSE: 100.143456
+Cost-To-Go: 12, Ave DNN Output: 0.993956, MSE: 121.133965
+Cost-To-Go: 13, Ave DNN Output: 0.992345, MSE: 144.184631
+Cost-To-Go: 14, Ave DNN Output: 0.994307, MSE: 169.149033
+Cost-To-Go: 15, Ave DNN Output: 0.991539, MSE: 196.237823
+Cost-To-Go: 16, Ave DNN Output: 0.993700, MSE: 225.190048
+Cost-To-Go: 17, Ave DNN Output: 0.990283, MSE: 256.311890
+Cost-To-Go: 18, Ave DNN Output: 0.993318, MSE: 289.228302
+Cost-To-Go: 19, Ave DNN Output: 0.989619, MSE: 324.374725
+Cost-To-Go: 20, Ave DNN Output: 0.992352, MSE: 361.291809
+Cost-To-Go: 21, Ave DNN Output: 0.987779, MSE: 400.489899
+Cost-To-Go: 22, Ave DNN Output: 0.991210, MSE: 441.370361
+Cost-To-Go: 23, Ave DNN Output: 0.986493, MSE: 484.595428
+Cost-To-Go: 24, Ave DNN Output: 0.990419, MSE: 529.442017
+Cost-To-Go: 25, Ave DNN Output: 0.985101, MSE: 576.716370
+Cost-To-Go: 26, Ave DNN Output: 0.989490, MSE: 625.526917
+Cost-To-Go: 27, Ave DNN Output: 0.983598, MSE: 676.854187
+Cost-To-Go: 28, Ave DNN Output: 0.987920, MSE: 729.653809
+Cost-To-Go: 29, Ave DNN Output: 0.982058, MSE: 785.005920
+Cost-To-Go: 30, Ave DNN Output: 0.995104, MSE: 841.285339
+Cost-To-Go: 31, Ave DNN Output: 0.990250, MSE: 900.585388
+--- Value Iteration Update: 4 ---
+Itr:  800 , loss:  0.009744396433234215 , lr:  0.001 , target_ctg:  0.9900000095367432 , nnet_ctg:  0.9865403771400452 , Time:  0.9044506549835205
+Itr:  900 , loss:  0.009884682483971119 , lr:  0.000996 , target_ctg:  0.9900000095367432 , nnet_ctg:  0.9851709008216858 , Time:  0.1600353717803955
+Cost-To-Go: 0, Ave DNN Output: 0.918963, MSE: 0.844492
+Cost-To-Go: 1, Ave DNN Output: 0.982127, MSE: 0.000330
+Cost-To-Go: 2, Ave DNN Output: 0.984423, MSE: 1.032150
+Cost-To-Go: 3, Ave DNN Output: 0.980233, MSE: 4.079635
+Cost-To-Go: 4, Ave DNN Output: 0.989017, MSE: 9.066476
+Cost-To-Go: 5, Ave DNN Output: 0.994978, MSE: 16.040569
+Cost-To-Go: 6, Ave DNN Output: 0.993898, MSE: 25.061625
+Cost-To-Go: 7, Ave DNN Output: 0.989018, MSE: 36.132381
+Cost-To-Go: 8, Ave DNN Output: 0.989034, MSE: 49.154495
+Cost-To-Go: 9, Ave DNN Output: 0.991342, MSE: 64.139343
+Cost-To-Go: 10, Ave DNN Output: 0.993093, MSE: 81.125305
+Cost-To-Go: 11, Ave DNN Output: 0.990982, MSE: 100.181259
+Cost-To-Go: 12, Ave DNN Output: 0.991963, MSE: 121.177811
+Cost-To-Go: 13, Ave DNN Output: 0.990726, MSE: 144.223511
+Cost-To-Go: 14, Ave DNN Output: 0.992598, MSE: 169.193481
+Cost-To-Go: 15, Ave DNN Output: 0.990197, MSE: 196.275406
+Cost-To-Go: 16, Ave DNN Output: 0.992294, MSE: 225.232254
+Cost-To-Go: 17, Ave DNN Output: 0.989302, MSE: 256.343292
+Cost-To-Go: 18, Ave DNN Output: 0.992194, MSE: 289.266541
+Cost-To-Go: 19, Ave DNN Output: 0.988950, MSE: 324.398804
+Cost-To-Go: 20, Ave DNN Output: 0.991542, MSE: 361.322540
+Cost-To-Go: 21, Ave DNN Output: 0.987417, MSE: 400.504395
+Cost-To-Go: 22, Ave DNN Output: 0.990651, MSE: 441.393860
+Cost-To-Go: 23, Ave DNN Output: 0.986388, MSE: 484.600067
+Cost-To-Go: 24, Ave DNN Output: 0.990066, MSE: 529.458191
+Cost-To-Go: 25, Ave DNN Output: 0.985166, MSE: 576.713196
+Cost-To-Go: 26, Ave DNN Output: 0.989255, MSE: 625.538574
+Cost-To-Go: 27, Ave DNN Output: 0.983729, MSE: 676.847412
+Cost-To-Go: 28, Ave DNN Output: 0.987689, MSE: 729.666260
+Cost-To-Go: 29, Ave DNN Output: 0.981954, MSE: 785.011841
+Cost-To-Go: 30, Ave DNN Output: 0.993998, MSE: 841.349487
+Cost-To-Go: 31, Ave DNN Output: 0.988409, MSE: 900.695923
+--- Value Iteration Update: 5 ---
+Itr:  1000 , loss:  0.009593158029019833 , lr:  0.001 , target_ctg:  0.9900000095367432 , nnet_ctg:  0.9871322512626648 , Time:  0.9001493453979492
+Itr:  1100 , loss:  0.009663589298725128 , lr:  0.000996 , target_ctg:  0.9900000095367432 , nnet_ctg:  0.9887649416923523 , Time:  0.16970467567443848
+Cost-To-Go: 0, Ave DNN Output: 0.914309, MSE: 0.835961
+Cost-To-Go: 1, Ave DNN Output: 0.980558, MSE: 0.000392
+Cost-To-Go: 2, Ave DNN Output: 0.985415, MSE: 1.030111
+Cost-To-Go: 3, Ave DNN Output: 0.982167, MSE: 4.071817
+Cost-To-Go: 4, Ave DNN Output: 0.991901, MSE: 9.049104
+Cost-To-Go: 5, Ave DNN Output: 0.998168, MSE: 16.014996
+Cost-To-Go: 6, Ave DNN Output: 0.997234, MSE: 25.028238
+Cost-To-Go: 7, Ave DNN Output: 0.992888, MSE: 36.085846
+Cost-To-Go: 8, Ave DNN Output: 0.993036, MSE: 49.098381
+Cost-To-Go: 9, Ave DNN Output: 0.995721, MSE: 64.069191
+Cost-To-Go: 10, Ave DNN Output: 0.997510, MSE: 81.045753
+Cost-To-Go: 11, Ave DNN Output: 0.995628, MSE: 100.088249
+Cost-To-Go: 12, Ave DNN Output: 0.996471, MSE: 121.078575
+Cost-To-Go: 13, Ave DNN Output: 0.995519, MSE: 144.108368
+Cost-To-Go: 14, Ave DNN Output: 0.997277, MSE: 169.071762
+Cost-To-Go: 15, Ave DNN Output: 0.995160, MSE: 196.136353
+Cost-To-Go: 16, Ave DNN Output: 0.997140, MSE: 225.086823
+Cost-To-Go: 17, Ave DNN Output: 0.994476, MSE: 256.177643
+Cost-To-Go: 18, Ave DNN Output: 0.997208, MSE: 289.095978
+Cost-To-Go: 19, Ave DNN Output: 0.994310, MSE: 324.205750
+Cost-To-Go: 20, Ave DNN Output: 0.996744, MSE: 361.124786
+Cost-To-Go: 21, Ave DNN Output: 0.992972, MSE: 400.282043
+Cost-To-Go: 22, Ave DNN Output: 0.996008, MSE: 441.168762
+Cost-To-Go: 23, Ave DNN Output: 0.992107, MSE: 484.348236
+Cost-To-Go: 24, Ave DNN Output: 0.995553, MSE: 529.205750
+Cost-To-Go: 25, Ave DNN Output: 0.991004, MSE: 576.432861
+Cost-To-Go: 26, Ave DNN Output: 0.994822, MSE: 625.260193
+Cost-To-Go: 27, Ave DNN Output: 0.989621, MSE: 676.540833
+Cost-To-Go: 28, Ave DNN Output: 0.993283, MSE: 729.364075
+Cost-To-Go: 29, Ave DNN Output: 0.987728, MSE: 784.688232
+Cost-To-Go: 30, Ave DNN Output: 0.998962, MSE: 841.061462
+Cost-To-Go: 31, Ave DNN Output: 0.993195, MSE: 900.408630
+--- Value Iteration Update: 6 ---
+Itr:  1200 , loss:  0.0006911437958478928 , lr:  0.001 , target_ctg:  1.0 , nnet_ctg:  0.9948782324790955 , Time:  0.9089760780334473
+Itr:  1300 , loss:  0.017455387860536575 , lr:  0.000996 , target_ctg:  0.9800000190734863 , nnet_ctg:  0.9877175092697144 , Time:  0.1661849021911621
+Cost-To-Go: 0, Ave DNN Output: 0.904667, MSE: 0.818423
+Cost-To-Go: 1, Ave DNN Output: 0.973369, MSE: 0.000725
+Cost-To-Go: 2, Ave DNN Output: 0.980478, MSE: 1.040107
+Cost-To-Go: 3, Ave DNN Output: 0.977802, MSE: 4.089442
+Cost-To-Go: 4, Ave DNN Output: 0.988210, MSE: 9.071307
+Cost-To-Go: 5, Ave DNN Output: 0.994722, MSE: 16.042553
+Cost-To-Go: 6, Ave DNN Output: 0.993983, MSE: 25.060757
+Cost-To-Go: 7, Ave DNN Output: 0.990048, MSE: 36.119949
+Cost-To-Go: 8, Ave DNN Output: 0.990282, MSE: 49.136978
+Cost-To-Go: 9, Ave DNN Output: 0.993299, MSE: 64.107948
+Cost-To-Go: 10, Ave DNN Output: 0.995058, MSE: 81.089882
+Cost-To-Go: 11, Ave DNN Output: 0.993405, MSE: 100.132713
+Cost-To-Go: 12, Ave DNN Output: 0.994102, MSE: 121.130692
+Cost-To-Go: 13, Ave DNN Output: 0.993415, MSE: 144.158875
+Cost-To-Go: 14, Ave DNN Output: 0.995042, MSE: 169.129868
+Cost-To-Go: 15, Ave DNN Output: 0.993190, MSE: 196.191513
+Cost-To-Go: 16, Ave DNN Output: 0.995039, MSE: 225.149826
+Cost-To-Go: 17, Ave DNN Output: 0.992683, MSE: 256.235016
+Cost-To-Go: 18, Ave DNN Output: 0.995243, MSE: 289.162781
+Cost-To-Go: 19, Ave DNN Output: 0.992667, MSE: 324.264893
+Cost-To-Go: 20, Ave DNN Output: 0.994935, MSE: 361.193512
+Cost-To-Go: 21, Ave DNN Output: 0.991498, MSE: 400.341034
+Cost-To-Go: 22, Ave DNN Output: 0.994333, MSE: 441.239075
+Cost-To-Go: 23, Ave DNN Output: 0.990775, MSE: 484.406891
+Cost-To-Go: 24, Ave DNN Output: 0.993994, MSE: 529.277405
+Cost-To-Go: 25, Ave DNN Output: 0.989786, MSE: 576.491272
+Cost-To-Go: 26, Ave DNN Output: 0.993347, MSE: 625.333801
+Cost-To-Go: 27, Ave DNN Output: 0.988471, MSE: 676.600586
+Cost-To-Go: 28, Ave DNN Output: 0.991846, MSE: 729.441589
+Cost-To-Go: 29, Ave DNN Output: 0.986493, MSE: 784.757385
+Cost-To-Go: 30, Ave DNN Output: 0.996929, MSE: 841.179321
+Cost-To-Go: 31, Ave DNN Output: 0.991214, MSE: 900.527649
+--- Value Iteration Update: 7 ---
+Itr:  1400 , loss:  0.0007579589728266001 , lr:  0.001 , target_ctg:  1.0 , nnet_ctg:  0.9935763478279114 , Time:  0.9193892478942871
+Itr:  1500 , loss:  0.0008954317308962345 , lr:  0.000996 , target_ctg:  1.0 , nnet_ctg:  0.9869679808616638 , Time:  0.17403721809387207
+Cost-To-Go: 0, Ave DNN Output: 0.896847, MSE: 0.804334
+Cost-To-Go: 1, Ave DNN Output: 0.968854, MSE: 0.000987
+Cost-To-Go: 2, Ave DNN Output: 0.978484, MSE: 1.044148
+Cost-To-Go: 3, Ave DNN Output: 0.976220, MSE: 4.095839
+Cost-To-Go: 4, Ave DNN Output: 0.987490, MSE: 9.075640
+Cost-To-Go: 5, Ave DNN Output: 0.994217, MSE: 16.046576
+Cost-To-Go: 6, Ave DNN Output: 0.993789, MSE: 25.062712
+Cost-To-Go: 7, Ave DNN Output: 0.990247, MSE: 36.117554
+Cost-To-Go: 8, Ave DNN Output: 0.990559, MSE: 49.133091
+Cost-To-Go: 9, Ave DNN Output: 0.993907, MSE: 64.098198
+Cost-To-Go: 10, Ave DNN Output: 0.995681, MSE: 81.078682
+Cost-To-Go: 11, Ave DNN Output: 0.994229, MSE: 100.116211
+Cost-To-Go: 12, Ave DNN Output: 0.994806, MSE: 121.115181
+Cost-To-Go: 13, Ave DNN Output: 0.994361, MSE: 144.136139
+Cost-To-Go: 14, Ave DNN Output: 0.995891, MSE: 169.107773
+Cost-To-Go: 15, Ave DNN Output: 0.994282, MSE: 196.160904
+Cost-To-Go: 16, Ave DNN Output: 0.996039, MSE: 225.119797
+Cost-To-Go: 17, Ave DNN Output: 0.993957, MSE: 256.194214
+Cost-To-Go: 18, Ave DNN Output: 0.996386, MSE: 289.123871
+Cost-To-Go: 19, Ave DNN Output: 0.994101, MSE: 324.213257
+Cost-To-Go: 20, Ave DNN Output: 0.996238, MSE: 361.143951
+Cost-To-Go: 21, Ave DNN Output: 0.993101, MSE: 400.276855
+Cost-To-Go: 22, Ave DNN Output: 0.995770, MSE: 441.178680
+Cost-To-Go: 23, Ave DNN Output: 0.992524, MSE: 484.329865
+Cost-To-Go: 24, Ave DNN Output: 0.995548, MSE: 529.205872
+Cost-To-Go: 25, Ave DNN Output: 0.991650, MSE: 576.401794
+Cost-To-Go: 26, Ave DNN Output: 0.994974, MSE: 625.252502
+Cost-To-Go: 27, Ave DNN Output: 0.990389, MSE: 676.500793
+Cost-To-Go: 28, Ave DNN Output: 0.993491, MSE: 729.352722
+Cost-To-Go: 29, Ave DNN Output: 0.988294, MSE: 784.656433
+Cost-To-Go: 30, Ave DNN Output: 0.998018, MSE: 841.116089
+Cost-To-Go: 31, Ave DNN Output: 0.992234, MSE: 900.466431
+--- Value Iteration Update: 8 ---
+Itr:  1600 , loss:  0.016705259680747986 , lr:  0.001 , target_ctg:  0.9800000190734863 , nnet_ctg:  0.9901697635650635 , Time:  0.918337345123291
+Itr:  1700 , loss:  0.016773119568824768 , lr:  0.000996 , target_ctg:  0.9800000190734863 , nnet_ctg:  0.9904580116271973 , Time:  0.167036771774292
+Cost-To-Go: 0, Ave DNN Output: 0.882187, MSE: 0.778255
+Cost-To-Go: 1, Ave DNN Output: 0.958573, MSE: 0.001726
+Cost-To-Go: 2, Ave DNN Output: 0.971128, MSE: 1.059200
+Cost-To-Go: 3, Ave DNN Output: 0.969223, MSE: 4.124198
+Cost-To-Go: 4, Ave DNN Output: 0.981506, MSE: 9.111740
+Cost-To-Go: 5, Ave DNN Output: 0.988606, MSE: 16.091564
+Cost-To-Go: 6, Ave DNN Output: 0.988653, MSE: 25.114189
+Cost-To-Go: 7, Ave DNN Output: 0.985601, MSE: 36.173428
+Cost-To-Go: 8, Ave DNN Output: 0.985963, MSE: 49.197567
+Cost-To-Go: 9, Ave DNN Output: 0.989796, MSE: 64.164040
+Cost-To-Go: 10, Ave DNN Output: 0.991538, MSE: 81.153328
+Cost-To-Go: 11, Ave DNN Output: 0.990350, MSE: 100.193871
+Cost-To-Go: 12, Ave DNN Output: 0.990785, MSE: 121.203712
+Cost-To-Go: 13, Ave DNN Output: 0.990598, MSE: 144.226501
+Cost-To-Go: 14, Ave DNN Output: 0.992017, MSE: 169.208557
+Cost-To-Go: 15, Ave DNN Output: 0.990673, MSE: 196.261993
+Cost-To-Go: 16, Ave DNN Output: 0.992341, MSE: 225.230804
+Cost-To-Go: 17, Ave DNN Output: 0.990557, MSE: 256.303070
+Cost-To-Go: 18, Ave DNN Output: 0.992846, MSE: 289.244293
+Cost-To-Go: 19, Ave DNN Output: 0.990876, MSE: 324.329376
+Cost-To-Go: 20, Ave DNN Output: 0.992875, MSE: 361.271790
+Cost-To-Go: 21, Ave DNN Output: 0.990048, MSE: 400.399017
+Cost-To-Go: 22, Ave DNN Output: 0.992545, MSE: 441.314209
+Cost-To-Go: 23, Ave DNN Output: 0.989621, MSE: 484.457672
+Cost-To-Go: 24, Ave DNN Output: 0.992443, MSE: 529.348755
+Cost-To-Go: 25, Ave DNN Output: 0.988861, MSE: 576.535645
+Cost-To-Go: 26, Ave DNN Output: 0.991932, MSE: 625.404602
+Cost-To-Go: 27, Ave DNN Output: 0.987626, MSE: 676.644592
+Cost-To-Go: 28, Ave DNN Output: 0.990439, MSE: 729.517578
+Cost-To-Go: 29, Ave DNN Output: 0.985361, MSE: 784.820740
+Cost-To-Go: 30, Ave DNN Output: 0.994322, MSE: 841.330627
+Cost-To-Go: 31, Ave DNN Output: 0.988106, MSE: 900.714111
