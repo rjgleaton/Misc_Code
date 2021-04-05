@@ -61,7 +61,7 @@ def train_nnet(nnet: nn.Module, states_nnet: np.ndarray, outputs: np.ndarray, ba
         scheduler.step()
 
         if epoch % 100 == 0:
-            print("Itr: ", epoch, ", loss: ", loss.item(), ", lr: ",
+            print("Itr: ", train_itr+epoch, ", loss: ", loss.item(), ", lr: ",
                   optimizer.param_groups[0]['lr'], ", target_ctg: ", labels.mean().item(), ", esnnet_ctg: ", pred.mean().item(), ", Time: ", time.time()-start)
             start = time.time()
 pass
