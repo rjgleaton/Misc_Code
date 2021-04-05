@@ -68,11 +68,12 @@ pass
 
 def value_iteration(nnet, device, env: Environment, states: List[State]) -> List[float]:
     rewards = []
+    #Check if is goal state
     for elem in env.is_solved(states):
         if elem == True:
-            rewards.append(0.0)
+            rewards.append(0.0) #Set value to 0 if goal state
         else:
-            rewards.append(1.0)
+            rewards.append(1.0) #Set value to 1 otherwise
     return rewards
    
 pass        
