@@ -1,34 +1,36 @@
 from typing import List
 from torch import nn
-import torch.nn.functional as F
 import numpy as np
 import torch
 import time
 import pdb
 
+from torch.nn.modules.batchnorm import BatchNorm1d
+
 from environments.environment_abstract import Environment, State
 
 
 class Cost2Go(nn.Module):
-    def __init__(self):
+    def __init__(self, num_inputs = 81, hidden_size1 = 40, hidden_size2 = 20, num_outputs = 1):
         super(Cost2Go, self).__init__()
-        #values chosen are arbitrarily besides input and output
-        self.bn1 = nn.BatchNorm1d(81, track_running_stats=True)
-        self.fc1 = nn.Linear(81, 40)
-        self.bn2 = nn.BatchNorm1d(40, track_running_stats=True)
-        self.fc2 = nn.Linear(40, 20)
-        self.fc3 = nn.Linear(20, 1)
+        self.linear_block1 = nn.Sequential(
+            nn.Linear(num_inputs, hidden_size1, bias=False),
+            nn.BatchNorm1d(hidden_size1),
+            nn.ReLU()
+        )
+        self.linear_block2 = nn.Sequential(
+            nn.Linear(hidden_size1, hidden_size2, bias=False),
+            nn.BatchNorm1d(hidden_size2),
+            nn.ReLU()
+        )
+        self.output_block = nn.Sequential(
+            nn.Linear(hidden_size2, num_outputs)
+        )
 
     def forward(self, x):
-        #x = F.batch_norm(self.bn1(x), self.bn1.running_mean, self.bn1.running_var)
-        #pdb.set_trace()
-        x = self.bn1(x)
-        #pdb.set_trace()
-        x = F.relu(self.fc1(x))
-        #x = F.batch_norm(self.bn2(x), self.bn2.running_mean, self.bn2.running_var)
-        x = self.bn2(x)
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = self.linear_block1(x)
+        x = self.linear_block2(x)
+        x = self.output_block(x)
         return x
 
 
@@ -41,7 +43,7 @@ def train_nnet(nnet: nn.Module, states_nnet: np.ndarray, outputs: np.ndarray, ba
 
     start = time.time()
     criterion = nn.MSELoss()
-    optimizer = torch.optim.SGD(nnet.parameters(), lr=0.001, momentum = 0.9)
+    optimizer = torch.optim.Adam(nnet.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer, step_size=100, gamma=0.996)
 
@@ -56,6 +58,8 @@ def train_nnet(nnet: nn.Module, states_nnet: np.ndarray, outputs: np.ndarray, ba
 
     #training loop
     for epoch, to_load in enumerate(data_loader, 0):
+        nnet.train()
+
         inputs, labels = to_load
         pred = nnet(inputs)
 
@@ -85,12 +89,7 @@ def value_iteration(nnet, device, env: Environment, states: List[State]) -> List
         else:
             rewards.append(1.0) #Set value to 1 otherwise
             count_false = count_false + 1
-    
-    print(len(states))
-    print(sum(env.is_solved(states)))
-    print(count_true)
-    print(count_false)
-    #pdb.set_trace()
+            
     return rewards
    
 pass        
