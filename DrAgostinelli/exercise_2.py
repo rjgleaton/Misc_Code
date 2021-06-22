@@ -106,40 +106,36 @@ def generate_plot(nnet: nn.Module(), device, env: Environment, states: List[Stat
     
 
 def approx_admissable_conv(env: Environment, nnet_output: np.ndarray, optimal_output: np.ndarray, states: List[State]) -> np.ndarray:
-    admissible_heur: np.ndarray =  np.zeros_like(nnet_output)
     
-
+    admissible_heur: np.ndarray =  np.zeros_like(nnet_output)
     h_new: np.ndarray = np.copy(admissible_heur)
     b = 3.0
-
     #create user defined set of cutoffs
     cut_offs: np.ndarray = np.array([])
     i = 0
     max_h = max(nnet_output)
+
     while i < max_h:
         cut_offs = np.append(cut_offs, [i])
         i = i+1
     cut_offs = np.append(cut_offs, max_h)
 
     o_c_max: np.ndarray = np.zeros_like(cut_offs)
+    solved: np.ndarray = np.zeros_like(nnet_output) #0.0 for false, and 1.0 for true
 
     #while x is an element of the representative set and is_solved == false
     x = 0
 
-    while x < len(nnet_output): 
+    while x < len(nnet_output) and solved[x] == 0.0: 
 
         #adjust inadmissible hueristic 
         h_new = adjust_inadmissible_huerisitc(h_new, cut_offs, o_c_max, nnet_output, admissible_heur, b)
 
         #for x element X do -> h^a(x), is_solved(x) <- A*(x,h',h^a(x)+n)
-        eta = 10.0
+        eta = 5.0
         for x in range(len(nnet_output)):
-            #pdb.set_trace()
             print(x)
-            admissible_heur[x], solved = a_star_update(env, states[x], states, h_new, admissible_heur[x]+eta)
-        
-        if solved == 1.0: #1.0 == True
-            break
+            admissible_heur[x], solved[x] = a_star_update(env, states[x], states, h_new, admissible_heur[x]+eta)
 
         if x % 100 == 0:
             print("Current progress: "+(x/len(solved))*100+"%")
@@ -154,46 +150,56 @@ def approx_admissable_conv(env: Environment, nnet_output: np.ndarray, optimal_ou
 #@vectorize(["np.ndarray(np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, float)"], target ='cuda')
 def adjust_inadmissible_huerisitc(h_new: np.ndarray, cut_offs: np.ndarray, o_c_max: np.ndarray, nnet_output: np.ndarray, admissible_heur: np.ndarray, b: float) -> np.ndarray:
     #get o_c_max
-    for i, c in enumerate(cut_offs):
-        #pdb.set_trace()
-        for j in range(len(nnet_output)):
-            if nnet_output[j] <= c:
-                #pdb.set_trace()
-                o_c_max[i] = max(o_c_max[i], nnet_output[j]-admissible_heur[j])
+    o_c_max = get_oc_max(o_c_max, cut_offs, nnet_output, admissible_heur)
         
     for i in range(len(cut_offs)):
         o_c_max[i] = max(o_c_max[i] - b, 0)
         
     #set h'
+    h_new = get_h_new(h_new, o_c_max, cut_offs, nnet_output)
+
+    return h_new
+
+
+@jit(nopython = True)
+def get_oc_max(o_c_max: np.ndarray, cut_offs: np.ndarray, nnet_output: np.ndarray, admissible_heur: np.ndarray) -> np.ndarray:
+    for i, c in enumerate(cut_offs):
+        for j in range(len(nnet_output)):
+            if nnet_output[j] <= c:
+                o_c_max[i] = max(o_c_max[i], nnet_output[j]-admissible_heur[j])
+
+    return o_c_max
+
+
+@jit(nopython = True)
+def get_h_new(h_new: np.ndarray, o_c_max: np.ndarray, cut_offs: np.ndarray, nnet_output: np.ndarray) -> np.ndarray:
     for i in range(len(h_new)):
         for j, c in enumerate(cut_offs):
             if nnet_output[i] <= c:
-                #pdb.set_trace()
                 h_new[i] = nnet_output[i] - o_c_max[j]
-                break 
+                break
 
-    #pdb.set_trace()
-    return h_new
+    return h_new     
+
 
 #@jit(nopython = True)
+#every call to this function takes around 1 or 2 full seconds
 def a_star_update(env: Environment, state: State, states: List[State], h_new: np.ndarray, max_step) -> Tuple[float, float]:
     children = env.expand(states)
+    is_solved = env.is_solved(states)
     opened = np.empty(shape=(1,2), dtype = object)
     closed = np.empty(shape=(1,2), dtype = object)
     
     opened = np.append(opened, [[state, h_new[states.index(state)]]], axis = 0)
     opened = np.delete(opened, 0, 0)
 
-    #pdb.set_trace()
-
     max_cost_state: float = 0.0
     try:
         while len(opened) > 0:
-            #pdb.set_trace()
             lowest_cost_state = opened[np.argmin(opened[:,1])]
 
             #check if lowest cost state is goal state
-            if env.is_solved([lowest_cost_state[0]])[0] == True:
+            if is_solved[states.index(lowest_cost_state[0])] == True:
                 return lowest_cost_state[1], 1.0
 
             #Check if over max step limit
@@ -204,37 +210,30 @@ def a_star_update(env: Environment, state: State, states: List[State], h_new: np
             if lowest_cost_state[1] > max_cost_state:
                 max_cost_state = lowest_cost_state[1]
 
-            #add children of state to opened
+            #add children of state to opened, alter closed if necessary
+            #opened, closed = add_children(children, lowest_cost_state, states)
             index_of_LCS = states.index(lowest_cost_state[0])
             for c in range(len(children[0][index_of_LCS])):
-                #check if child in closed:
+            #check if child in closed:
                 new_child = [children[0][index_of_LCS][c], lowest_cost_state[1]+children[1][index_of_LCS][c]]
-                #pdb.set_trace()
                 if np.isin(new_child[0], closed) == False:
                     opened = np.append(opened, [new_child], axis = 0)
                 else:
                     #if lower cost state found add back to open, not sure if theres a built in function to do this
-                    #pdb.set_trace()
                     for i, x in enumerate(closed):
-                        #pdb.set_trace()
                         if type(x[0]) != type(None) and new_child[0] == x[0] and new_child[1] < x[1]:
                             opened = np.append(opened, [new_child], axis = 0)
                             closed = np.delete(closed, i, 0)
 
             #add to closed and delete from opened
             closed = np.append(closed, [lowest_cost_state], axis = 0)
-            #pdb.set_trace()
+
             if len(closed) > 0 and np.isin(True, np.isin(closed, None)) == True: #really dumb work around, not sure how else to solve it tho
                 closed = np.delete(closed, 0, 0)
-                #pdb.set_trace() #check closed
-            #pdb.set_trace()
 
             for i, x in enumerate(opened):
-                #pdb.set_trace()
                 if all(x == lowest_cost_state):
-                    #pdb.set_trace()
                     opened = np.delete(opened, i, 0)
-                    #pdb.set_trace()
 
         return max_cost_state, 0.0
     except:
@@ -242,59 +241,27 @@ def a_star_update(env: Environment, state: State, states: List[State], h_new: np
         traceback.print_exc()
         pdb.post_mortem(tb)
 
-
-
-    '''
-    #opened: np.array(Tuple[State, float]) = [[]]
-    opened = np.empty(shape=(1,2), dtype = object)
-
-    #set initial state into opened
-    #pdb.set_trace() #make sure np.where works :)
-    opened = np.append(opened, [[state, h_new[states.index(state)]]], axis = 0)
-    opened = np.delete(opened, 0, 0)
-
-    closed = np.empty(shape=(1,2), dtype = object)
-
-    max_cost_state: float = 0.0
-    while opened.size > 0:
-        #Get state in opened with lowest cost
-        lowest_cost_state = opened[0]
-        for x in opened:
-            #pdb.set_trace()
-            if x[1] < lowest_cost_state[1]:
-                lowest_cost_state = x
-
-        #Check if goal state
-        if env.is_solved([lowest_cost_state[0]])[0] == True:
-            return lowest_cost_state[1], 1.0
-
-        #Check if over max step limit
-        if lowest_cost_state[1] > max_step:
-            return lowest_cost_state[1], 0.0
-
-        #check if greater than max cost state:
-        if lowest_cost_state[1] > max_cost_state:
-            max_cost_state = lowest_cost_state[1]
-
-        #Get the children of the state with the lowest cost
-        children = env.expand([lowest_cost_state[0]])
-        #set path cost of children
-        for i in range(len(children[1][0])):
-            #pdb.set_trace()
-            children[1][0][i] = lowest_cost_state[1] + h_new[states.index(children[0][0][i])]
-
-        for i in range(len(children[0])):
-            opened = np.append(opened, [[children[0][0][i], children[1][0][i]]], axis = 0)
-
-        #add to closed and delete from opened
-        closed = np.append(closed, lowest_cost_state)
-        if closed[0] == [None, None]:
-            closed = np.delete(closed, 0, 0)
-        #pdb.set_trace() #check if np.delete works
+'''
+@jit(nopython = True)
+def add_children(children: Tuple[List[List[State]], List[List[float]]], lowest_cost_state: np.ndarray, states:np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    index_of_LCS = states.index(lowest_cost_state[0])
+    for c in range(len(children[0][index_of_LCS])):
+        #check if child in closed:
+        new_child = [children[0][index_of_LCS][c], lowest_cost_state[1]+children[1][index_of_LCS][c]]
         #pdb.set_trace()
-        opened = np.delete(opened, np.where(opened == lowest_cost_state), axis = 0)
+        if np.isin(new_child[0], closed) == False:
+            opened = np.append(opened, [new_child], axis = 0)
+        else:
+            #if lower cost state found add back to open, not sure if theres a built in function to do this
+            #pdb.set_trace()
+            for i, x in enumerate(closed):
+                #pdb.set_trace()
+                if type(x[0]) != type(None) and new_child[0] == x[0] and new_child[1] < x[1]:
+                    opened = np.append(opened, [new_child], axis = 0)
+                    closed = np.delete(closed, i, 0)
 
-    return max_cost_state, 0.0
-    '''
+    return opened, closed
+'''
+
 if __name__ == "__main__":
     main()
