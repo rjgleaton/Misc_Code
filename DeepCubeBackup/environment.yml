@@ -1,0 +1,12 @@
+name: pytorch
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - pytorch
+  - matplotlib
+  - scipy
+  - scikit-learn
+  - tensorboard
+  - scikit-image
+
