@@ -11,7 +11,7 @@ from utils.misc_utils import evaluate_cost_to_go
 from utils.nnet_utils import states_nnet_to_pytorch_input
 from utils.misc_utils import flatten
 
-import pickle, random
+import pickle, random, time
 
 from to_implement.functions import get_nnet_model, train_nnet, value_iteration
 import pdb, traceback, sys
@@ -125,21 +125,161 @@ def generate_plot(nnet: nn.Module(), device, env: Environment, states: List[Stat
 
 def approx_admissible_conv(env: Environment, nnet_output: np.ndarray, optimal_output: np.ndarray, states: List[State], sample_states: np.ndarray, sample_outputs: np.ndarray, sample_optimal: np.ndarray):
 
-    h_admissible: Dict[State, float] = {sample_states[i]: 0 for i in range(len(sample_states))}
-    is_solved: Dict[State, bool] = {sample_states[i]: False for i in range(len(sample_states))}
+    try:
 
-    complete_solve: bool = False
-    while(complete_solve == False):
-        h_new = adjust_h_new(h_admissible, nnet_output, sample_states, sample_outputs)
+        h_admissible: Dict[State, float] = {sample_states[i]: 0 for i in range(len(sample_states))}
+        is_solved: Dict[State, bool] = {sample_states[i]: False for i in range(len(sample_states))}
+
+        complete_solve: bool = False
+        while(complete_solve == False):
+            h_new: Dict[State, float] = adjust_h_new(h_admissible, nnet_output, states, sample_states, sample_outputs)
+
+            eta = 3.0
+            count = 0
+            for state in sample_states: 
+                h_admissible[state], is_solved[state] = a_star_update(env, state, h_new, h_admissible[state]+eta, states, nnet_output)
+                count += 1
+                print(count)
+
+            if False not in is_solved.values():
+                complete_solve = True
+        
+        h_new: Dict[int, float] = adjust_h_new(h_admissible, nnet_output, states, sample_states, sample_outputs)
+
+        return np.array(list(h_new.values()))
 
 
+    except:
+        extype, value, tb = sys.exc_info()
+        traceback.print_exc()
+        pdb.post_mortem(tb)
 
-def adjust_h_new(h_admissible: Dict, nnet_output: np.ndarray, sample_states: np.ndarray, sample_outputs: np.ndarray) -> Dict:
+
+def adjust_h_new(h_admissible: Dict, nnet_output: np.ndarray, states: List, sample_states: np.ndarray, sample_outputs: np.ndarray) -> Dict:
 
     #Get set of cut offs
-    cutoffs: List = {i for i in range(max(sample_outputs))}
-    cutoffs = cutoffs.append(max(sample_outputs))
-    pdb.set_trace()
+    cutoffs: List = np.arange(0, int(max(sample_outputs))+1, 1).tolist()
+    cutoffs.append(max(sample_outputs))
+    
+    #o_c_max is list of max overestimations for each cut off provided the output is less than the cut off
+    #same indexs as cutoffs
+    o_c_max: List = get_o_c_max(cutoffs, nnet_output, sample_outputs, sample_states, h_admissible, states)
+
+    #eq (4) h'(x) = h(x) - o_c_max
+    h_new: Dict[int, float] = {hash(sample_states[i]): sample_outputs[i] - o_c_max[np.argmin(np.argwhere(sample_outputs[i] <= cutoffs))] for i in range(len(sample_states))}
+
+    return h_new
+
+def get_o_c_max(cutoffs: List, nnet_output: np.ndarray, sample_outputs: np.ndarray, sample_states: np.ndarray, h_admissible: Dict, states: List) -> List:
+
+    o_c_max: List = []
+
+    for i in range(len(cutoffs)):
+        curr_max = float('-inf')
+        for j in np.argwhere(np.asarray(sample_outputs) < cutoffs[i]).flatten():
+            #o_c_max = max(xEX|h(x)<c) (h(x) - h_a(x))
+            curr_max = max(curr_max, sample_outputs[j] - h_admissible[sample_states[j]])
+        o_c_max.append(curr_max)
+
+    #eq (7)
+    b = 0
+    for i in range(len(o_c_max)):
+        o_c_max[i] = max(o_c_max[i] - b, 0)
+
+    return o_c_max
+
+def a_star_update(env: Environment, state: State, h_new: Dict[State, float], max_step: float, states: List[State], nnet_output: np.ndarray) -> Tuple[float, bool]:
+    update = AStarUpdate(env, state, h_new, max_step, states, nnet_output)
+    max_cost_state = float('-inf')
+
+    if update.is_solved_dict[update.curr_state] == True:
+        return update.opened[update.curr_state], True
+    
+    while len(update.opened) > 0:
+        update.step()
+
+        if update.is_solved_dict[update.curr_state] == True:
+            return update.opened[update.curr_state], True
+
+        elif update.opened[update.curr_state] + update.h_new[update.curr_state] > max_step:
+            return update.opened[update.curr_state], False
+
+        elif update.opened[update.curr_state] + update.h_new[update.curr_state] > max_cost_state:
+            max_cost_state = update.opened[update.curr_state] + update.h_new[update.curr_state]
+        
+        update.delete()
+        
+    return max_cost_state, False
+
+
+
+class AStarUpdate:
+
+    def __init__(self, env: Environment, state: State, h_new: Dict[State, float], max_step: float, states: List[State], nnet_output: np.ndarray):
+        self.env: Environment = env
+        self.curr_state: int = hash(state)
+        self.states: List[State] = states
+        #TODO Change all dictionary instances to have the hash of the state as the key, not the state itself
+        self.h_new: Dict[int, float] = h_new
+        self.nnet_output: np.ndarray = nnet_output
+        self.max_step: float = max_step
+
+        start = time.time()
+        get_children: List[List[State]] = env.expand(self.states)[0]
+        #self.children_list: Dict[int, List[State]] = {hash(states[i]): get_children[i] for i in range(len(states))}
+        self.children_list: Dict[int, List[int]] = dict()
+        for i, child_list in enumerate(get_children):
+            self.children_list[hash(states[i])] = []
+            for child in child_list:
+                self.children_list[hash(states[i])].append(hash(self.states[self.states.index(child)]))
+        end = time.time()
+        print(end-start)
+
+        self.nnet_output_dict: Dict[int, float] = {hash(states[i]): nnet_output[i] for i in range(len(states))}
+        solved_list: np.ndarray = env.is_solved(states)
+        self.is_solved_dict: Dict[int, bool]= {hash(states[i]): solved_list[i] for i in range(len(solved_list))}
+        self.states_to_hash: Dict[State, int] = {self.states[i]: hash(self.states[i]) for i in range(len(self.states))}
+
+        self.opened: Dict[int, float] = dict()
+        self.closed: Dict[int, float] = dict()
+
+        self.opened[self.curr_state] = 0.0
+
+
+    def step(self):
+        #Find smallest value in opened and add children to opened
+        #TODO check is state in h_new, if not, use nnet_output
+        self.curr_state = list(self.opened.items())[0][0]
+        for key in self.opened:
+            if key in self.h_new:
+                if (self.opened[key] + self.h_new[key]) < (self.opened[self.curr_state] + self.h_new[self.curr_state]):
+                    self.curr_state = key
+            else:
+                if (self.opened[key] + self.nnet_output_dict[key]) < (self.opened[self.curr_state] + self.nnet_output_dict[self.curr_state]):
+                    self.curr_state = key
+
+        valueOfMin = self.opened[self.curr_state]
+        for child in self.children_list[self.curr_state]:
+            pdb.set_trace()
+            self.opened[hash(child)] = valueOfMin+1
+        
+    def delete(self):
+        #add to closed delete from opened
+        self.closed[self.curr_state] = self.opened[self.curr_state]
+        del self.opened[self.curr_state]
+
+
+@jit(nopython = True)
+def get_children_list(get_children: List[List[State]], states: List[State])->Dict[int, List[int]]:
+    children_list: Dict[int, List[int]] = dict()
+    for i, child_list in enumerate(get_children):
+        children_list[hash(states[i])] = []
+        for child in child_list:
+            children_list[hash(states[i])].append(hash(states[states.index(child)]))
+    return children_list
+
+
+
 
 '''
 def approx_admissable_conv(env: Environment, nnet_output: np.ndarray, optimal_output: np.ndarray, states: List[State], sample_states: List, sample_expected: np.ndarray) -> np.ndarray:
@@ -177,14 +317,6 @@ def approx_admissable_conv(env: Environment, nnet_output: np.ndarray, optimal_ou
 
             #for x element X do -> h^a(x), is_solved(x) <- A*(x,h',h^a(x)+n)
             eta = 3.0
-            '''
-
-'''
-            for x in range(len(sample_outputs)):
-                print(x)
-                admissible_heur[x], solved[x] = a_star_update(env, states[x], states, h_new, admissible_heur[x]+eta)
-'''
-            '''
             
             poop = 0
             for i in range(len(nnet_output)):
@@ -309,3 +441,4 @@ class AStarUpdate:
 '''
 if __name__ == "__main__":
     main()
+
