@@ -1,5 +1,6 @@
-from typing import List, Tuple
+from typing import List, Tuple, Set, Dict
 import numpy as np
+from environments.n_puzzle import NPuzzle, NPuzzleState
 
 import torch
 from torch import nn
@@ -10,18 +11,18 @@ from utils.misc_utils import evaluate_cost_to_go
 from utils.nnet_utils import states_nnet_to_pytorch_input
 from utils.misc_utils import flatten
 
-import pickle
+import pickle, random, time, threading, multiprocessing
 
 from to_implement.functions import get_nnet_model, train_nnet, value_iteration
 import pdb, traceback, sys
 
-#from torch.utils.tensorboard import SummaryWriter
+
 from matplotlib import pyplot as plt
 
 from numba import jit, njit, vectorize, cuda, uint32, f8, uint8
 
 def main():
-    torch.set_num_threads(1)
+    torch.set_num_threads(4)
 
     #Set up TesnorBoard writer
     #writer = SummaryWriter()
@@ -34,14 +35,14 @@ def main():
     device = torch.device('cpu')
     batch_size: int = 100
     num_itrs_per_vi_update: int = 200
-    num_vi_updates: int = 1
-    #num_vi_updates: int = 50
+    #num_vi_updates: int = 1
+    num_vi_updates: int = 50
 
     # get data
     print("Preparing Data\n")
     data = pickle.load(open("data/data.pkl", "rb"))
 
-
+    '''
     # train with supervised learning
     print("Training DNN\n")
     train_itr: int = 0
@@ -72,6 +73,11 @@ def main():
 
     #writer.close()
     #pdb.set_trace()
+    FILE = "model.pth"
+    torch.save(nnet.state_dict(), FILE)
+    '''
+    FILE = "model.pth"
+    nnet.load_state_dict(torch.load(FILE))
     generate_plot(nnet, device, env, data["states"], data["output"])
 
 def generate_plot(nnet: nn.Module(), device, env: Environment, states: List[State], outputs: np.array):
@@ -84,184 +90,223 @@ def generate_plot(nnet: nn.Module(), device, env: Environment, states: List[Stat
 
     out_nnet_array = np.array(out_nnet)
     outputs_array = np.array(outputs)
-    #pdb.set_trace()
-    
-    h_new: np.ndarray = approx_admissable_conv(env, outputs_array, outputs_array, states)
 
-    before, after = plt.subplots()
-    before.scatter(outputs_array, out_nnet_array, c = '000000', linewidths = 0.1)
+    random_indexs = list(range(len(out_nnet_array)))
+    random.shuffle(random_indexs)
+
+    random_states: np.ndarray = []
+    sample_expected: np.ndarray = []
+    sample_outputs: np.ndarray = []
+
+    for i in range(100):
+        random_states.append(states[random_indexs[i]])
+        sample_expected.append(outputs_array[random_indexs[i]])
+        sample_outputs.append(out_nnet_array[random_indexs[i]])
+
+    h_new: np.ndarray = approx_admissible_conv(env, nnet, out_nnet_array, outputs_array, states, random_states, sample_outputs, sample_expected)
+
+    #before, after = plt.subplots()
+    plt.scatter(sample_expected, sample_outputs, c = '000000', linewidths = 0.1)
     #plt.plot([0,0],[30,30], c = 'g')
-    before.axline([0,0],[30,30], linewidth =3, c = 'g')
-    before.ylabel('NNet output')
-    before.xlabel('Expected value')
-    before.title("Output vs Expected")
-    before.show()
+    plt.axline([0,0],[30,30], linewidth =3, c = 'g')
+    plt.ylabel('NNet output')
+    plt.xlabel('Expected value')
+    plt.title("Output vs Expected")
+    plt.show()
+    #before.savefig("preconversion.pdf")
 
-    after.scatter(outputs_array, h_new, c = '000000', linewidths = 0.1)
-    after.axline([0,0],[30,30], linewidth =3, c = 'g')
-    after.ylabel('Converted output')
-    after.xlabel('Expected value')
-    after.title("Converted Output vs Expected")
-    after.show()    
     
+    plt.scatter(sample_expected, h_new, c = '000000', linewidths = 0.1)
+    plt.axline([0,0],[30,30], linewidth =3, c = 'g')
+    plt.ylabel('Converted output')
+    plt.xlabel('Expected value')
+    plt.title("Converted Output vs Expected")
+    plt.show() 
+       
 
-def approx_admissable_conv(env: Environment, nnet_output: np.ndarray, optimal_output: np.ndarray, states: List[State]) -> np.ndarray:
-    
-    admissible_heur: np.ndarray =  np.zeros_like(nnet_output)
-    h_new: np.ndarray = np.copy(admissible_heur)
-    b = 3.0
-    #create user defined set of cutoffs
-    cut_offs: np.ndarray = np.array([])
-    i = 0
-    max_h = max(nnet_output)
+def approx_admissible_conv(env: Environment, nnet: nn.Module(), nnet_output: np.ndarray, optimal_output: np.ndarray, states: List[State], sample_states: np.ndarray, sample_outputs: np.ndarray, sample_optimal: np.ndarray) -> np.ndarray:
 
-    while i < max_h:
-        cut_offs = np.append(cut_offs, [i])
-        i = i+1
-    cut_offs = np.append(cut_offs, max_h)
-
-    o_c_max: np.ndarray = np.zeros_like(cut_offs)
-    solved: np.ndarray = np.zeros_like(nnet_output) #0.0 for false, and 1.0 for true
-
-    #while x is an element of the representative set and is_solved == false
-    x = 0
-
-    while x < len(nnet_output) and solved[x] == 0.0: 
-
-        #adjust inadmissible hueristic 
-        h_new = adjust_inadmissible_huerisitc(h_new, cut_offs, o_c_max, nnet_output, admissible_heur, b)
-
-        #for x element X do -> h^a(x), is_solved(x) <- A*(x,h',h^a(x)+n)
-        eta = 5.0
-        for x in range(len(nnet_output)):
-            print(x)
-            admissible_heur[x], solved[x] = a_star_update(env, states[x], states, h_new, admissible_heur[x]+eta)
-
-        if x % 100 == 0:
-            print("Current progress: "+(x/len(solved))*100+"%")
-
-        x += 1
-    
-    #adjust h' one last time before returning
-    h_new = adjust_inadmissible_huerisitc(h_new, cut_offs, o_c_max, nnet_output, admissible_heur, b)
-
-    return h_new
-
-#@vectorize(["np.ndarray(np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, float)"], target ='cuda')
-def adjust_inadmissible_huerisitc(h_new: np.ndarray, cut_offs: np.ndarray, o_c_max: np.ndarray, nnet_output: np.ndarray, admissible_heur: np.ndarray, b: float) -> np.ndarray:
-    #get o_c_max
-    o_c_max = get_oc_max(o_c_max, cut_offs, nnet_output, admissible_heur)
-        
-    for i in range(len(cut_offs)):
-        o_c_max[i] = max(o_c_max[i] - b, 0)
-        
-    #set h'
-    h_new = get_h_new(h_new, o_c_max, cut_offs, nnet_output)
-
-    return h_new
-
-
-@jit(nopython = True)
-def get_oc_max(o_c_max: np.ndarray, cut_offs: np.ndarray, nnet_output: np.ndarray, admissible_heur: np.ndarray) -> np.ndarray:
-    for i, c in enumerate(cut_offs):
-        for j in range(len(nnet_output)):
-            if nnet_output[j] <= c:
-                o_c_max[i] = max(o_c_max[i], nnet_output[j]-admissible_heur[j])
-
-    return o_c_max
-
-
-@jit(nopython = True)
-def get_h_new(h_new: np.ndarray, o_c_max: np.ndarray, cut_offs: np.ndarray, nnet_output: np.ndarray) -> np.ndarray:
-    for i in range(len(h_new)):
-        for j, c in enumerate(cut_offs):
-            if nnet_output[i] <= c:
-                h_new[i] = nnet_output[i] - o_c_max[j]
-                break
-
-    return h_new     
-
-
-#@jit(nopython = True)
-#every call to this function takes around 1 or 2 full seconds
-def a_star_update(env: Environment, state: State, states: List[State], h_new: np.ndarray, max_step) -> Tuple[float, float]:
-    children = env.expand(states)
-    is_solved = env.is_solved(states)
-    opened = np.empty(shape=(1,2), dtype = object)
-    closed = np.empty(shape=(1,2), dtype = object)
-    
-    opened = np.append(opened, [[state, h_new[states.index(state)]]], axis = 0)
-    opened = np.delete(opened, 0, 0)
-
-    max_cost_state: float = 0.0
     try:
-        while len(opened) > 0:
-            lowest_cost_state = opened[np.argmin(opened[:,1])]
+        start = time.time()
+        h_admissible: Dict[State, float] = {sample_states[i]: 0 for i in range(len(sample_states))}
+        is_solved: Dict[State, bool] = {sample_states[i]: False for i in range(len(sample_states))}
 
-            #check if lowest cost state is goal state
-            if is_solved[states.index(lowest_cost_state[0])] == True:
-                return lowest_cost_state[1], 1.0
+        complete_solve: bool = False
+        while(complete_solve == False):
+            h_new: Dict[State, float] = adjust_h_new(h_admissible, nnet_output, states, sample_states, sample_outputs)
 
-            #Check if over max step limit
-            if lowest_cost_state[1] > max_step:
-                return lowest_cost_state[1], 0.0
+            eta = 5.0
+            count = 0
+            for state in sample_states:
+                if is_solved[state] is not True: 
+                    h_admissible[state], is_solved[state] = a_star_update(env, nnet, state, h_new, h_admissible[state]+eta, states, nnet_output)
+                count += 1
+                print(count)
 
-            #check if greater than max cost state:
-            if lowest_cost_state[1] > max_cost_state:
-                max_cost_state = lowest_cost_state[1]
+            if False not in is_solved.values():
+                complete_solve = True
 
-            #add children of state to opened, alter closed if necessary
-            #opened, closed = add_children(children, lowest_cost_state, states)
-            index_of_LCS = states.index(lowest_cost_state[0])
-            for c in range(len(children[0][index_of_LCS])):
-            #check if child in closed:
-                new_child = [children[0][index_of_LCS][c], lowest_cost_state[1]+children[1][index_of_LCS][c]]
-                if np.isin(new_child[0], closed) == False:
-                    opened = np.append(opened, [new_child], axis = 0)
-                else:
-                    #if lower cost state found add back to open, not sure if theres a built in function to do this
-                    for i, x in enumerate(closed):
-                        if type(x[0]) != type(None) and new_child[0] == x[0] and new_child[1] < x[1]:
-                            opened = np.append(opened, [new_child], axis = 0)
-                            closed = np.delete(closed, i, 0)
+            unsolved_count = 0
+            for value in list(is_solved.values()):
+                if value == False:
+                    unsolved_count += 1
+            
+            print("Number of unsolved states: ",unsolved_count)
+            #if unsolved_count == 100 or unsolved_count < 10:
+            '''
+            plt.scatter(sample_optimal, np.array(list(h_new.values())), c = '000000', linewidths = 0.1)
+            plt.axline([0,0],[30,30], linewidth =3, c = 'g')
+            plt.ylabel('Converted output')
+            plt.xlabel('Expected value')
+            plt.title("Converted Output vs Expected")
+            plt.show() 
+            '''
+        h_new: Dict[int, float] = adjust_h_new_final(h_admissible, nnet_output, states, sample_states, sample_outputs)
 
-            #add to closed and delete from opened
-            closed = np.append(closed, [lowest_cost_state], axis = 0)
+        end = time.time()
+        print('Total time: ', end-start)
+        return np.array(list(h_new.values()))
 
-            if len(closed) > 0 and np.isin(True, np.isin(closed, None)) == True: #really dumb work around, not sure how else to solve it tho
-                closed = np.delete(closed, 0, 0)
 
-            for i, x in enumerate(opened):
-                if all(x == lowest_cost_state):
-                    opened = np.delete(opened, i, 0)
-
-        return max_cost_state, 0.0
     except:
         extype, value, tb = sys.exc_info()
         traceback.print_exc()
         pdb.post_mortem(tb)
 
-'''
-@jit(nopython = True)
-def add_children(children: Tuple[List[List[State]], List[List[float]]], lowest_cost_state: np.ndarray, states:np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    index_of_LCS = states.index(lowest_cost_state[0])
-    for c in range(len(children[0][index_of_LCS])):
-        #check if child in closed:
-        new_child = [children[0][index_of_LCS][c], lowest_cost_state[1]+children[1][index_of_LCS][c]]
-        #pdb.set_trace()
-        if np.isin(new_child[0], closed) == False:
-            opened = np.append(opened, [new_child], axis = 0)
-        else:
-            #if lower cost state found add back to open, not sure if theres a built in function to do this
-            #pdb.set_trace()
-            for i, x in enumerate(closed):
-                #pdb.set_trace()
-                if type(x[0]) != type(None) and new_child[0] == x[0] and new_child[1] < x[1]:
-                    opened = np.append(opened, [new_child], axis = 0)
-                    closed = np.delete(closed, i, 0)
 
-    return opened, closed
-'''
+def adjust_h_new(h_admissible: Dict, nnet_output: np.ndarray, states: List, sample_states: np.ndarray, sample_outputs: np.ndarray) -> Dict[State, float]:
+
+    #Get set of cut offs
+    cutoffs: List = np.arange(0, int(max(sample_outputs))+1, 1).tolist()
+    cutoffs.append(max(sample_outputs))
+    
+    #o_c_max is list of max overestimations for each cut off provided the output is less than the cut off
+    #same indexs as cutoffs
+    o_c_max: List = get_o_c_max(cutoffs, nnet_output, sample_outputs, sample_states, h_admissible, states)
+
+    #eq (4) h'(x) = h(x) - o_c_max
+
+    h_new: Dict[int, float] = {hash(sample_states[i]): sample_outputs[i] - o_c_max[np.argwhere(sample_outputs[i] <= cutoffs).flatten()[0]] for i in range(len(sample_states))}
+    #pdb.set_trace()
+    return h_new
+
+def adjust_h_new_final(h_admissible: Dict, nnet_output: np.ndarray, states: List, sample_states: np.ndarray, sample_outputs: np.ndarray) -> Dict[State, float]:
+
+    #Get set of cut offs
+    cutoffs: List = np.arange(0, int(max(sample_outputs))+1, 1).tolist()
+    cutoffs.append(max(sample_outputs))
+    
+    #o_c_max is list of max overestimations for each cut off provided the output is less than the cut off
+    #same indexs as cutoffs
+    o_c_max: List = get_o_c_max_final(cutoffs, nnet_output, sample_outputs, sample_states, h_admissible, states)
+
+    #eq (4) h'(x) = h(x) - o_c_max
+
+    h_new: Dict[int, float] = {hash(sample_states[i]): sample_outputs[i] - o_c_max[np.argwhere(sample_outputs[i] <= cutoffs).flatten()[0]] for i in range(len(sample_states))}
+    #pdb.set_trace()
+    return h_new
+
+def get_o_c_max(cutoffs: List, nnet_output: np.ndarray, sample_outputs: np.ndarray, sample_states: np.ndarray, h_admissible: Dict, states: List) -> List:
+
+    o_c_max: List = []
+
+    for i in range(len(cutoffs)):
+        curr_max = float('-inf')
+        for j in np.argwhere(np.asarray(sample_outputs) < cutoffs[i]).flatten():
+            #o_c_max = max(xEX|h(x)<c) (h(x) - h_a(x))
+            curr_max = max(curr_max, sample_outputs[j] - h_admissible[sample_states[j]])
+        o_c_max.append(curr_max)
+    
+    return o_c_max
+
+def get_o_c_max_final(cutoffs: List, nnet_output: np.ndarray, sample_outputs: np.ndarray, sample_states: np.ndarray, h_admissible: Dict, states: List) -> List:
+
+    o_c_max: List = []
+
+    for i in range(len(cutoffs)):
+        curr_max = float('-inf')
+        for j in np.argwhere(np.asarray(sample_outputs) < cutoffs[i]).flatten():
+            #o_c_max = max(xEX|h(x)<c) (h(x) - h_a(x))
+            curr_max = max(curr_max, sample_outputs[j] - h_admissible[sample_states[j]])
+        o_c_max.append(curr_max)
+
+    #pdb.set_trace()
+    #eq (7)
+    b = 0
+    for i in range(len(o_c_max)):
+        o_c_max[i] = max(o_c_max[i] - b, 0)
+
+    return o_c_max
+
+#TODO might have to change it so it ALWAYS returns the max cost of all nodes expanded
+def a_star_update(env: Environment, nnet: nn.Module(), state: State, h_new: Dict[State, float], max_step: float, states: List[State], nnet_output: np.ndarray) -> Tuple[float, bool]:
+    update = AStarUpdate(env, nnet, state, h_new[hash(state)], max_step, states, nnet_output)
+    max_cost_state = float('-inf')
+
+    if env.is_solved([state])[0] == True:
+        return update.opened[update.curr_state][0], True
+    
+    while len(update.opened) > 0:
+        update.step()
+
+        if update.env.is_solved([update.curr_state])[0] == True:
+            return update.opened[update.curr_state][1], True
+
+        elif update.opened[update.curr_state][0] + update.opened[update.curr_state][1] > max_step:
+            return update.opened[update.curr_state][0] + update.opened[update.curr_state][1], False   
+        
+        elif update.opened[update.curr_state][0] + update.opened[update.curr_state][1] > max_cost_state:
+            max_cost_state = update.opened[update.curr_state][0] + update.opened[update.curr_state][1]
+        
+        update.delete()
+
+    #Not sure if this should be considered solved or not    
+    del update
+    return max_cost_state, True
+
+
+
+class AStarUpdate:
+
+    def __init__(self, env: Environment, nnet: nn.Module(), state: State, h_new: float, max_step: float, states: List[State], nnet_output: np.ndarray):
+        self.env: Environment = env
+        self.nnet: nn.Module() = nnet
+        self.curr_state: State = state
+        self.states: List[State] = states
+        self.max_step: float = max_step
+        
+        #First float is heuristic, second is path cost/length
+        self.opened: Dict[State, Tuple[float, float]] = {state: [h_new, 0.0]}
+        self.closed: Dict[State, Tuple[float, float]] = dict()
+
+    def step(self):
+        self.nnet.eval()
+        #Find lowest cost state
+        lowest_cost_state: State = list(self.opened.keys())[0]
+        for item in self.opened:
+            if self.opened[lowest_cost_state][0] + self.opened[lowest_cost_state][1] > self.opened[item][0] + self.opened[item][1]:
+                lowest_cost_state = item
+        self.curr_state = lowest_cost_state
+
+        #Add Children to open
+        children = self.env.expand([lowest_cost_state])[0][0]
+        children_output = self.nnet(states_nnet_to_pytorch_input(self.env.state_to_nnet_input(children), 'cpu').float()).cpu().data.numpy()
+        for i, child in enumerate(children):
+            if child in self.closed:
+                if (children_output[i][0] + self.opened[lowest_cost_state][1]+1.0) < (self.closed[child][0] + self.closed[child][1]):
+                    self.opened[child] = children_output[i][0], self.opened[lowest_cost_state][1]+1.0
+                else:
+                    continue
+            else:
+                self.opened[child] = children_output[i][0], self.opened[lowest_cost_state][1]+1.0
+        
+
+    def delete(self):
+        #add to closed delete from opened
+        self.closed[self.curr_state] = self.opened[self.curr_state]
+        del self.opened[self.curr_state]
+
+
 
 if __name__ == "__main__":
     main()
